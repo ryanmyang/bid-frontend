@@ -16,6 +16,11 @@ const LoginScreen: React.FC = () => {
     const checkIfSignedIn = async () => {
       try {
         const user = await GoogleSignin.signInSilently();
+
+        if (user != null && user.data == null){
+          throw { code: statusCodes.SIGN_IN_REQUIRED, message: "User needs to sign in." };
+        }
+        
         console.log('User signed in silently:', user);
         setUserInfo(user);
         setIsSignedIn(true);

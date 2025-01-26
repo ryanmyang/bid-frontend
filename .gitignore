@@ -83,3 +83,5 @@ ios/Pods/
 ios/build/
 ios/DerivedData/
 ios/*.xcworkspace
+
+android/**

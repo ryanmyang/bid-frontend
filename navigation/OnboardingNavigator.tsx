@@ -8,8 +8,10 @@ import YourNameScreen from '../screens/Onboarding/YourNameScreen';
 import GradYearScreen from '../screens/Onboarding/GradYearScreen';
 import AddressScreen from '../screens/Onboarding/AddressScreen';
 import NotificationPermissionScreen from '../screens/Onboarding/NotificationPermissionScreen';
+import WelcomeScreen from '@/screens/Onboarding/WelcomeScreen';
 
 export type OnboardingStackParamList = {
+  Welcome: undefined,
   SelectSchool: undefined;
   EnterEmail: undefined;
   CreateProfileIntro: undefined;
@@ -24,6 +26,7 @@ const Stack = createStackNavigator<OnboardingStackParamList>();
 export default function OnboardingNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Welcome" component={WelcomeScreen} />
       <Stack.Screen name="SelectSchool" component={SelectSchoolScreen} />
       <Stack.Screen name="EnterEmail" component={EnterEmailScreen} />
       <Stack.Screen name="CreateProfileIntro" component={CreateProfileIntroScreen} />

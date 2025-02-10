@@ -34,8 +34,8 @@ export default function HomeScreen() {
     {
       id: '3',
       title: 'Deliver documents to Murphy Hall',
-      taskerName: 'Sophia',
-      tags: ['Verified'],
+      taskerName: 'Rida',
+      tags: ['Urgent'],
       currentBid: 15,
     },
     {

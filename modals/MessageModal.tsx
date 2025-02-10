@@ -26,7 +26,7 @@ export default function MessageModal({ onClose, onSend }: MessageModalProps) {
         <TextInput
           style={styles.messageInput}
           multiline
-          placeholder="Hey! Could you explain..."
+          placeholder="Provide additional details to tasker..."
           placeholderTextColor={theme.colors.gray}
           value={message}
           onChangeText={setMessage}

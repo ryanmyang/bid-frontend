@@ -1,8 +1,8 @@
-// screens/YourTasksScreen.tsx
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { theme } from '../styles/theme';
+import CreateTaskModal from '../modals/CreateTaskModal';
 
 interface TaskItem {
   id: string;
@@ -12,35 +12,35 @@ interface TaskItem {
   numBidders: number;
 }
 
-const tasksCurrent: TaskItem[] = [
-  {
-    id: '1',
-    date: '12/10/2024',
-    title: 'Task name',
-    currentBid: '$20.00',
-    numBidders: 4,
-  },
-  {
-    id: '2',
-    date: '12/10/2024',
-    title: 'Task name',
-    currentBid: '$20.00',
-    numBidders: 4,
-  },
-];
-
-const tasksExpired: TaskItem[] = [
-  {
-    id: '1',
-    date: '10/01/2024',
-    title: 'Expired Task',
-    currentBid: '$10.00',
-    numBidders: 2,
-  },
-];
-
 export default function YourTasksScreen() {
   const [activeTab, setActiveTab] = useState<'Current' | 'Expired'>('Current');
+  const [isCreationModalVisible, setIsCreationModalVisible] = useState(false);
+  const [tasksCurrent, setTasksCurrent] = useState<TaskItem[]>([
+    {
+      id: '1',
+      date: '02/07/2025',
+      title: 'Take my suit to the dry cleaners',
+      currentBid: '$15.00',
+      numBidders: 4,
+    },
+    {
+      id: '2',
+      date: '02/06/2024',
+      title: 'Clean my dorm windows',
+      currentBid: '$20.00',
+      numBidders: 3,
+    },
+  ]);
+
+  const tasksExpired: TaskItem[] = [
+    {
+      id: '1',
+      date: '10/01/2024',
+      title: 'Expired Task',
+      currentBid: '$10.00',
+      numBidders: 2,
+    },
+  ];
 
   const data = activeTab === 'Current' ? tasksCurrent : tasksExpired;
 
@@ -55,7 +55,7 @@ export default function YourTasksScreen() {
       <Text style={styles.title}>{item.title}</Text>
 
       <View style={styles.bidRow}>
-        <Text style={styles.bidLabel}>CURRENT BID</Text>
+        <Text style={styles.bidLabel}>TOP BID</Text>
         <Text style={styles.bid}>{item.currentBid}</Text>
         <View style={styles.biddersContainer}>
           <Text style={styles.biddersText}>{item.numBidders} BIDDERS</Text>
@@ -69,7 +69,8 @@ export default function YourTasksScreen() {
       {/* Header */}
       <Text style={styles.heading}>Your tasks</Text>
       <Text style={styles.subtext}>
-        Brief blurb about what the task is and like what you have to do can go here.
+        See all your current outgoing tasks!
+        Click on the task card for info on bidders and to accept bids!
       </Text>
 
       {/* Toggle */}
@@ -106,9 +107,29 @@ export default function YourTasksScreen() {
       />
 
       {/* Floating Add Button */}
-      <TouchableOpacity style={styles.fabButton}>
+      <TouchableOpacity 
+        style={styles.fabButton}
+        onPress={() => setIsCreationModalVisible(true)}
+      >
         <Ionicons name="add" size={24} color="#fff" />
       </TouchableOpacity>
+
+      {/* Create Task Modal */}
+      <CreateTaskModal
+        visible={isCreationModalVisible}
+        onClose={() => setIsCreationModalVisible(false)}
+        onSubmit={(newTask) => {
+          const newTaskItem = {
+            id: Date.now().toString(),
+            date: new Date().toLocaleDateString(),
+            title: newTask.name,
+            currentBid: '$0.00',
+            numBidders: 0,
+          };
+          setTasksCurrent(prev => [...prev, newTaskItem]);
+          setIsCreationModalVisible(false);
+        }}
+      />
     </View>
   );
 }
@@ -116,7 +137,7 @@ export default function YourTasksScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#CDECC1', // Light green from Figma
+    backgroundColor: '#CDECC1',
     paddingTop: 50,
     paddingHorizontal: theme.spacing.md,
   },

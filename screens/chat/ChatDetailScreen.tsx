@@ -23,17 +23,22 @@ interface Message {
 const sampleMessages: Message[] = [
   {
     id: '1',
-    text: 'Chat message that they are saying and chatting about the task through this feature.',
-    fromSelf: false,
-  },
-  {
-    id: '2',
-    text: 'Chat message that they are saying and chatting about the task through this feature.',
+    text: 'I can drop it off at 3:00 pm?',
     fromSelf: true,
   },
   {
+    id: '2',
+    text: 'How about 4:00?',
+    fromSelf: false,
+  },
+  {
     id: '3',
-    text: 'Chat message that they are saying and chatting about the task through this feature.',
+    text: "4 pm works for me, I'll get to Ralph's at like 3:45",
+    fromSelf: true,
+  },
+  {
+    id: '4',
+    text: "Sounds good, lets make it official?",
     fromSelf: false,
     special: true, // e.g. "Accept task"
   },
@@ -57,7 +62,7 @@ export default function ChatDetailScreen() {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color="#000" />
         </TouchableOpacity>
-        <Text style={styles.userName}>Tasker Name</Text>
+        <Text style={styles.userName}>Mark: Pick up from Ralph's</Text>
         <Ionicons name="ellipsis-horizontal" size={24} color="#000" />
       </View>
 

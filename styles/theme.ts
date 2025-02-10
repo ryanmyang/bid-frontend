@@ -1,5 +1,3 @@
-// styles/theme.ts
-
 export const theme = {
   colors: {
     white: '#FFFFFF',
@@ -12,7 +10,7 @@ export const theme = {
     blueLight: '#ADD8E6AA',
     gray: '#666666',
     grayLight: '#F5F5F5',
-    // Add additional colors as needed
+    redLight: '#FFCCCB', // Added for swipe feedback
   },
   spacing: {
     xs: 5,

@@ -51,15 +51,14 @@ export default function HomeScreen() {
       currentBid: 10,
       description: 'Reserve a seat for finals week.',
     },
-    {
-      id: '5',
-      title: 'Pick up a package from Amazon Locker',
-      taskerName: 'Mia',
-      tags: ['< 30 min'],
-      currentBid: 15,
-      description: 'Retrieve a package from the Amazon Locker.',
-    },
-    // … (other tasks updated similarly)
+    // {
+    //   id: '5',
+    //   title: 'Pick up a package from Amazon Locker',
+    //   taskerName: 'Mia',
+    //   tags: ['< 30 min'],
+    //   currentBid: 15,
+    //   description: 'Retrieve a package from the Amazon Locker.',
+    // },
   ]);
   
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);

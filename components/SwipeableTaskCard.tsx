@@ -1,6 +1,6 @@
 // SwipeableTaskCard.tsx
 import React from 'react';
-import { StyleSheet, Dimensions, View } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -43,7 +43,6 @@ export default function SwipeableTaskCard({
   const translateX = useSharedValue(0);
   const opacity = useSharedValue(1);
 
-  // Called on the JS thread when the swipe is complete.
   const triggerDismiss = (taskId: string, isSwipedRight: boolean) => {
     if (isSwipedRight) {
       onSwipeRight(task);
@@ -56,20 +55,17 @@ export default function SwipeableTaskCard({
       context.startX = translateX.value;
     },
     onActive: (event, context) => {
-      // Update position so the card follows your finger.
       translateX.value = context.startX + event.translationX;
     },
     onEnd: (event) => {
       if (Math.abs(translateX.value) > SWIPE_THRESHOLD) {
         const isSwipedRight = translateX.value > 0;
-        // Animate off-screen.
         translateX.value = withSpring(isSwipedRight ? 1000 : -1000, {
           velocity: event.velocityX,
         });
         opacity.value = withTiming(0);
         runOnJS(triggerDismiss)(task.id, isSwipedRight);
       } else {
-        // Snap back if not swiped far enough.
         translateX.value = withSpring(0);
       }
     },
@@ -77,14 +73,13 @@ export default function SwipeableTaskCard({
 
   const animatedCard = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
-    // The background color will change based on how far you've swiped.
     backgroundColor: interpolateColor(
       translateX.value,
       [-SWIPE_THRESHOLD, 0, SWIPE_THRESHOLD],
       [
-        theme.colors.redLight,    // When swiping left
-        theme.colors.white,       // Default (resting) state
-        theme.colors.greenLight,  // When swiping right
+        theme.colors.redLight,    // swiping left
+        theme.colors.white,       // default
+        theme.colors.greenLight,  // swiping right
       ]
     ),
     opacity: opacity.value,
@@ -93,18 +88,16 @@ export default function SwipeableTaskCard({
 
   return (
     <PanGestureHandler onGestureEvent={gestureHandler}>
-      {/* The outer animated container now has fixed dimensions and padding so that its background (the color indicator) shows as a border */}
       <Animated.View style={[styles.animatedContainer, animatedCard]}>
-        {/* Inner container: a white background holds the actual card content */}
-        <View style={styles.innerContainer}>
-          <TaskCard
-            title={task.title}
-            taskerName={task.taskerName}
-            tags={task.tags}
-            description={task.description}
-            currentBid={task.currentBid}
-          />
-        </View>
+        {/* Pass the task id along with the other properties */}
+        <TaskCard
+          id={task.id}
+          title={task.title}
+          taskerName={task.taskerName}
+          tags={task.tags}
+          description={task.description}
+          currentBid={task.currentBid}
+        />
       </Animated.View>
     </PanGestureHandler>
   );
@@ -116,12 +109,6 @@ const styles = StyleSheet.create({
     height: CARD_HEIGHT,
     margin: theme.spacing.md,
     borderRadius: 12,
-    padding: 5, // This padding makes a border visible that will show the dynamic (red/green) background.
-  },
-  innerContainer: {
-    flex: 1,
-    backgroundColor: theme.colors.white,
-    borderRadius: 12,
-    overflow: 'hidden',
+    padding: 5, // Allows the animated background color to be visible as a border.
   },
 });

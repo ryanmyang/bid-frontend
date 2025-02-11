@@ -21,29 +21,29 @@ export default function WelcomeScreen() {
       {/* Logo */}
       <View style={styles.logoContainer}>
         <Image
-          source={require('../../assets/images/logo.png')}
+          source={require('../../assets/images/bid_logo.jpg')}
           style={styles.logo}
           resizeMode="contain"
         />
       </View>
 
       {/* Welcome Text */}
-      <View style={styles.textContainer}>
+      {/* <View style={styles.textContainer}>
         <Text style={globalStyles.heading}>Welcome to Bid</Text>
         <Text style={globalStyles.subtext}>
           A platform to connect bidders and taskers. Let’s get started!
         </Text>
-      </View>
+      </View> */}
 
       {/* Continue Button */}
-      <PrimaryButton title="Continue" onPress={handleContinue} style={styles.button} />
+      <PrimaryButton color = "#ED8034" title="Continue" onPress={handleContinue} style={styles.button} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   background: {
-    backgroundColor: theme.colors.orangeLight,
+    backgroundColor: '#182443',
     flex: 1,
     alignItems: 'center', // Center items horizontally
     justifyContent: 'center', // Center items vertically
@@ -57,6 +57,7 @@ const styles = StyleSheet.create({
   logo: {
     width: 180,
     height: 180,
+    borderRadius: 90, // makes the image circular
   },
   textContainer: {
     alignItems: 'center',
@@ -64,5 +65,6 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 10, // Optional, if extra spacing is needed
+    backgroundColor: '#ED8034'
   },
 });

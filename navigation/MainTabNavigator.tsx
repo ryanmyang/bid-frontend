@@ -41,17 +41,17 @@ export default function MainTabNavigator() {
         tabBarInactiveTintColor: '#888',
         tabBarIcon: ({ color, size }) => {
           let iconName = 'home';
-          if (route.name === 'Home') iconName = 'home';
+          if (route.name === 'Swipe') iconName = 'swap-horizontal-outline';
           else if (route.name === 'Chat') iconName = 'chatbubble-outline';
-          else if (route.name === 'List') iconName = 'list-outline';
+          else if (route.name === 'Requests') iconName = 'list-outline';
           else if (route.name === 'Profile') iconName = 'person-outline';
           return <Ionicons name={iconName} size={size} color={color} />;
         },
       })}
     >
-      <Tab.Screen name="Home" component={HomeStackNavigator} />
+      <Tab.Screen name="Swipe" component={HomeStackNavigator} />
       <Tab.Screen name="Chat" component={ChatStackNavigator} />
-      <Tab.Screen name="Your Tasks" component={YourTasksScreen} />
+      <Tab.Screen name="Requests" component={YourTasksScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );

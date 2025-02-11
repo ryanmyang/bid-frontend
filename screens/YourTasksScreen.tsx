@@ -67,7 +67,7 @@ export default function YourTasksScreen() {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <Text style={styles.heading}>Your tasks</Text>
+      <Text style={styles.heading}>Your Requests</Text>
       <Text style={styles.subtext}>
         See all your current outgoing tasks!
         Click on the task card for info on bidders and to accept bids!

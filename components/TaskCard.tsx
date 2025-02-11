@@ -1,3 +1,4 @@
+// TaskCard.tsx
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { theme } from '../styles/theme';
@@ -5,72 +6,110 @@ import { theme } from '../styles/theme';
 interface TaskCardProps {
   title: string;
   taskerName: string;
-  tags?: string[];
+  tags: string[];
+  description: string;
   currentBid: number;
 }
 
-export default function TaskCard({ title, taskerName, tags = [], currentBid }: TaskCardProps) {
+export default function TaskCard({
+  title,
+  taskerName,
+  tags,
+  description,
+  currentBid,
+}: TaskCardProps) {
   return (
-    <View style={styles.card}>
-      <View style={styles.leftSection}>
-        <Text style={styles.title}>{title}</Text>
-        <Text style={styles.subtext}>{taskerName}</Text>
-        <View style={styles.tagsContainer}>
-          {tags.map((tag, idx) => (
-            <View key={idx} style={styles.tag}>
-              <Text style={styles.tagText}>{tag}</Text>
-            </View>
-          ))}
-        </View>
+    <View style={styles.cardContainer}>
+      {/* Task Name */}
+      <Text style={styles.title}>{title}</Text>
+      
+      {/* Tasker Name */}
+      <Text style={styles.taskerName}>{taskerName}</Text>
+      
+      {/* Tags as Bubbles */}
+      <View style={styles.tagsContainer}>
+        {tags.map((tag, index) => (
+          <View key={index} style={styles.tagBubble}>
+            <Text style={styles.tagText}>{tag}</Text>
+          </View>
+        ))}
       </View>
-      <View style={styles.rightSection}>
-        <Text style={styles.bidText}>${currentBid.toFixed(2)}</Text>
+      
+      {/* Description */}
+      <Text style={styles.description}>{description}</Text>
+      
+      {/* Current Bid with Fun Tag */}
+      <View style={styles.bidContainer}>
+        <Text style={styles.currentBid}>${currentBid}</Text>
+        <View style={styles.funTag}>
+          <Text style={styles.funTagText}>🔥</Text>
+        </View>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: theme.colors.white,
-    borderRadius: 12,
-    padding: theme.spacing.md,
-    flexDirection: 'row',
-    marginBottom: theme.spacing.sm,
-    elevation: 2,
-  },
-  leftSection: {
-    flex: 3,
-  },
-  rightSection: {
+  cardContainer: {
     flex: 1,
-    alignItems: 'flex-end',
-    justifyContent: 'center',
+    // Set backgroundColor to transparent so that the innerContainer's white background remains visible.
+    backgroundColor: 'transparent',
+    padding: theme.spacing.lg,
+    justifyContent: 'space-between',
   },
   title: {
-    fontWeight: theme.fonts.boldFontWeight,
-    fontSize: 16,
-    marginBottom: theme.spacing.xs,
+    fontSize: 36,
+    fontWeight: 'bold',
+    color: theme.colors.black,
+    marginBottom: theme.spacing.sm,
   },
-  subtext: {
+  taskerName: {
+    fontSize: 20,
     color: theme.colors.gray,
     marginBottom: theme.spacing.sm,
   },
   tagsContainer: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: theme.spacing.sm,
   },
-  tag: {
-    backgroundColor: '#DDD',
-    borderRadius: 8,
-    paddingHorizontal: theme.spacing.sm,
-    paddingVertical: theme.spacing.xs,
+  tagBubble: {
+    backgroundColor: theme.colors.orange,
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
     marginRight: theme.spacing.xs,
+    marginBottom: theme.spacing.xs,
   },
   tagText: {
-    fontSize: 12,
+    color: theme.colors.white,
+    fontSize: 14,
   },
-  bidText: {
+  description: {
     fontSize: 18,
-    fontWeight: theme.fonts.boldFontWeight,
+    color: theme.colors.gray,
+    marginBottom: theme.spacing.sm,
+    flex: 1,
+  },
+  bidContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
+  currentBid: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: theme.colors.green,
+    marginRight: theme.spacing.xs,
+  },
+  funTag: {
+    backgroundColor: theme.colors.orange,
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  funTagText: {
+    color: theme.colors.white,
+    fontSize: 14,
   },
 });

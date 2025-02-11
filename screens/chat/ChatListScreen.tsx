@@ -20,6 +20,7 @@ interface ChatPreview {
   latestMessage: string;
   avatar: any; // or string if remote URL
   badgeIcon?: string; // e.g. a star or sparkle
+  unread?: boolean;
 }
 
 const sampleChats: ChatPreview[] = [
@@ -29,6 +30,7 @@ const sampleChats: ChatPreview[] = [
     latestMessage: 'Sounds good, lets make it official?',
     avatar: require('../../assets/images/mark.jpg'),
     badgeIcon: '🛒',
+    unread: true,
   },
   {
     id: '2',
@@ -74,7 +76,7 @@ export default function ChatListScreen() {
         </View>
         <View style={styles.chatInfo}>
           <Text style={styles.name}>{item.name}</Text>
-          <Text style={styles.latestMessage}>{item.latestMessage}</Text>
+          <Text style={[styles.latestMessage, item.unread && styles.unreadText]}>{item.latestMessage}</Text>
         </View>
       </TouchableOpacity>
     );
@@ -207,5 +209,8 @@ const styles = StyleSheet.create({
   },
   latestMessage: {
     color: '#444',
+  },
+  unreadText: {
+    fontWeight: 'bold',
   },
 });

@@ -185,7 +185,11 @@ const styles = StyleSheet.create({
   inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: theme.spacing.md,
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm, // Increased padding for better spacing
+    backgroundColor: '#fff', // Ensures clear visibility
+    borderTopWidth: 1, // Add a slight divider for separation
+    borderTopColor: '#ccc',
   },
   plusButton: {
     width: 32,

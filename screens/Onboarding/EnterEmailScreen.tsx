@@ -9,6 +9,8 @@ import { OnboardingStackParamList } from '../../navigation/OnboardingNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { globalStyles } from '../../styles/globalStyles';
 import { theme } from '../../styles/theme';
+import { login } from '../../scripts/authApi';
+
 
 // Configure Google Sign-In (same as your LoginScreen)
 GoogleSignin.configure({
@@ -40,6 +42,10 @@ export default function EnterEmailScreen() {
         setUserInfo(user);
         setIsSignedIn(true);
 
+        // Log into api client to store JWT token to device
+        const log_res = login(user.email, user.google_id);
+        console.log(JSON.stringify(log_res))
+
         // Since they're already signed in, move on to the next onboarding step
         navigation.navigate('CreateProfileIntro');
       } catch (error: any) {
@@ -66,9 +72,14 @@ export default function EnterEmailScreen() {
   const signInWithGoogle = async () => {
     try {
       await GoogleSignin.hasPlayServices(); // For Android devices (safe to call on iOS too)
-      const user = await GoogleSignin.signIn(); // Opens the Google sign-in flow
+      const signinResponse = await GoogleSignin.signIn(); // Opens the Google sign-in flow
+      console.log(`response: ${JSON.stringify(signinResponse)}`)
+      const user = signinResponse.data?.user
       setUserInfo(user);
+      console.log(`User info: ${JSON.stringify(user)}`)
       setIsSignedIn(true);
+      login(user.email, '12345');
+      
 
       // Once signed in, proceed to the next page
       navigation.navigate('CreateProfileIntro');

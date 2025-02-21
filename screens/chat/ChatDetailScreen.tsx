@@ -103,7 +103,7 @@ export default function ChatDetailScreen() {
         </TouchableOpacity>
         <TextInput
           style={styles.textInput}
-          placeholder="Chat message that they..."
+          placeholder="Send a Message to Mark..."
           value={textValue}
           onChangeText={setTextValue}
         />

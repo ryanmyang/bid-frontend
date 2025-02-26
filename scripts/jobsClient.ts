@@ -3,14 +3,17 @@
 import axios from 'axios';
 import { request } from '@/scripts/apiClient';
 
-const JOBS_ENDPOINT = '/jobs';
+const JOBS_ENDPOINT = '/jobs/';
 
 export interface Job {
   _id?: string;
+  job_name: string;
   description: string;
   starting_price: number;
   expires_in: number;
   media?: string[];
+  bids?: string[];
+  timestamp?: string;
   tags: {
     category: string;
     location: string;
@@ -37,7 +40,7 @@ export const JobsAPI = {
   createJob: async (job: Job) => {
     return await request(JOBS_ENDPOINT, {
       method: 'POST',
-      body: JSON.stringify(job),
+      body: job,
     });
   },
 

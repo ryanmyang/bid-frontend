@@ -1,11 +1,14 @@
 // HomeScreen.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 import SwipeableTaskCard from '../components/SwipeableTaskCard';
 import BidCalculatorModal from '../modals/BidCalculatorModal';
 import MessageModal from '../modals/MessageModal';
 import { useNavigation } from '@react-navigation/native';
 import { theme } from '../styles/theme';
+import { JobsAPI, Bid } from '@/scripts/jobsClient'; // <-- Import your Jobs API
+import { login } from '@/scripts/authApi';
+import { Float } from 'react-native/Libraries/Types/CodegenTypes';
 
 interface Task {
   id: string;
@@ -13,60 +16,65 @@ interface Task {
   taskerName: string;
   tags: string[];
   currentBid: number;
-  description: string; // New field for the description
+  description: string;
 }
 
 export default function HomeScreen() {
   const navigation = useNavigation();
-  const [tasks, setTasks] = useState<Task[]>([
-    {
-      id: '1',
-      title: 'Wait in BruinAI merch line',
-      taskerName: 'Emily',
-      tags: ['< 30 min', 'High Demand'],
-      currentBid: 15,
-      description: 'Please wait in line and collect the merchandise.',
-    },
-    {
-      id: '2',
-      title: 'Pick up groceries from Trader Joe’s',
-      taskerName: 'Jake',
-      tags: ['< 30 min'],
-      currentBid: 18,
-      description: 'Get fresh groceries and deliver them quickly.',
-    },
-    {
-      id: '3',
-      title: 'Deliver documents to Murphy Hall',
-      taskerName: 'Rida',
-      tags: ['Urgent'],
-      currentBid: 16,
-      description: 'Ensure documents are delivered on time.',
-    },
-    {
-      id: '4',
-      title: 'Hold a spot at Powell Library during finals week',
-      taskerName: 'Daniel',
-      tags: ['< 1 hour', 'Urgent'],
-      currentBid: 10,
-      description: 'Reserve a seat for finals week.',
-    },
-    // {
-    //   id: '5',
-    //   title: 'Pick up a package from Amazon Locker',
-    //   taskerName: 'Mia',
-    //   tags: ['< 30 min'],
-    //   currentBid: 15,
-    //   description: 'Retrieve a package from the Amazon Locker.',
-    // },
-  ]);
-  
+
+  // We start off with an empty array here
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isMessageModalVisible, setIsMessageModalVisible] = useState(false);
 
+  // Fetch tasks from backend on component mount
+  useEffect(() => {
+    
+    const fetchTasks = async () => {
+      try {
+        // This returns { jobs: Job[], metadata: { ... } }
+        const { jobs } = await JobsAPI.getJobs();
+
+        // Transform each job into the Task shape your UI needs
+        const transformedTasks: Task[] = jobs.map((job: any) => {
+          // Merge category, location, and any tags into a single string[] if you like
+          const combinedTags: string[] = [];
+          if (job.tags?.category) combinedTags.push(job.tags.category);
+          if (job.tags?.location) combinedTags.push(job.tags.location);
+          if (job.tags?.tags) combinedTags.push(...job.tags.tags);
+
+          return {
+            id: job._id ?? '',  // Fallback if _id is undefined
+            title: job.description?.slice(0, 60) || 'Untitled Task',
+            taskerName: 'Unknown User', // You don't currently have real names from the endpoint
+            tags: combinedTags,
+            currentBid: job.starting_price,
+            description: job.description,
+          };
+        });
+
+        setTasks(transformedTasks);
+      } catch (error) {
+        console.error('Error fetching tasks:', error);
+      }
+    };
+
+    // LOGIN FOR TESTING PURPOSES ONLY
+    login('ryanmyangspam@gmail.com', '12345');
+    fetchTasks();
+  }, []);
+
+  // Remove a task from the array after user swipes left (dismiss)
   const handleDismiss = (taskId: string) => {
     setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
+  };
+
+  const addBid = (taskId: string, bidAmt:Float) => {
+    const bid: Bid = {amount: bidAmt}
+    JobsAPI.addBid(taskId, bid);
+    console.log('Bid submitted:', taskId, bidAmt);
+
   };
 
   return (
@@ -82,7 +90,6 @@ export default function HomeScreen() {
       {/* Card Deck: show only the top card */}
       <View style={styles.cardWrapper}>
         {tasks.length > 0 ? (
-          // Add key based on the task id so React remounts the component for each new task
           <SwipeableTaskCard
             key={tasks[0].id}
             task={tasks[0]}
@@ -105,7 +112,7 @@ export default function HomeScreen() {
           <BidCalculatorModal
             task={selectedTask}
             onClose={() => setIsModalVisible(false)}
-            onSubmit={(bid) => console.log('Bid submitted:', selectedTask.id, bid)}
+            onSubmit={(bid) => addBid(selectedTask.id, bid)}
             onBidConfirmed={() => {
               setIsMessageModalVisible(true);
               setIsModalVisible(false); // Close bid modal first

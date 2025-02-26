@@ -19,14 +19,14 @@ export default function WelcomeScreen() {
 
   const handleContinue = async () => {
     try {
-      const log_res = await login('ryanmyangspam@gmail.com', '12345');
+      // const log_res = await login('ryanmyangspam@gmail.com', '12345');
       // console.log(log_res);
-      const tokens = await getTokens();
-      console.log(`Auth header to use: ${JSON.stringify(tokens.accessToken)}`);
-      let jobs = await JobsAPI.getJobs(1,5);
-      console.log(`Jobs: ${JSON.stringify(jobs)}`);
+      // const tokens = await getTokens();
+      // console.log(`Auth header to use: ${JSON.stringify(tokens.accessToken)}`);
+      // let jobs = await JobsAPI.getJobs(1,5);
+      // console.log(`Jobs: ${JSON.stringify(jobs)}`);
 
-        // navigation.navigate('SelectSchool'); // Move to the existing first onboarding screen
+        navigation.navigate('SelectSchool'); // Move to the existing first onboarding screen
     } catch (error) {
         let message = "unknown error";
         let response = {}

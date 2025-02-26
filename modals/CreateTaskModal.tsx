@@ -13,7 +13,6 @@ interface CreateTaskModalProps {
 export default function CreateTaskModal({ visible, onClose, onSubmit }: CreateTaskModalProps) {
   const [taskData, setTaskData] = useState({
     name: '',
-    quickDescription: '',
     detailedDescription: '',
     categories: [] as string[],
     price: 10,

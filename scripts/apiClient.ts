@@ -1,6 +1,6 @@
 // apiClient.ts
 
-import axios, { AxiosRequestConfig } from 'axios';
+import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { getTokens, saveTokens, removeTokens } from './authStorage';
 
 const LOCAL_DEV_URL = 'http://127.0.0.1:5000/api/v1';
@@ -22,7 +22,7 @@ export async function request<T = any>(
   { method = 'GET', body, headers = {}, ...customConfig }: ExtendedRequestOptions = {},
   retryAttempt = false
 ): Promise<T> {
-  console.log(`\n----------------------- \n-----------------------OUTGOING REQUEST --------------------\n Endpoing: ${endpoint}, Method: ${method}, Body: ${JSON.stringify(body)}\n`)
+  console.log(`\n\n----------------------- OUTGOING REQUEST --------------------\n Endpoint: ${endpoint}, Method: ${method}, Body: ${JSON.stringify(body)}\n`)
   const { accessToken } = await getTokens();
 
   // Build final headers
@@ -54,9 +54,22 @@ export async function request<T = any>(
   };
 
   // Make request
-  const response = await axios<T>(config);
-  console.log(`------------ REQUEST RESPONSE --------------- ${JSON.stringify(response.data)} \n-----------------------\n-----------------------`)
-  return response.data; // No "return await" => no lint error
+  let response: AxiosResponse|null = null;
+  try {
+    response = await axios<T>(config);
+  } catch (error) {
+    
+    console.log(`Error casting request from apiClient ${error}`);
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 401 && retryAttempt == false) {
+        console.log('401 Error, attempting token refresh');
+        attemptTokenRefresh();
+        request(endpoint, {method, body, headers, ...customConfig}, true);
+      }
+    }
+  }
+  console.log(`\n----------------------- REQUEST RESPONSE --------------- ${JSON.stringify(response?.data)} \n-----------------------\n\n`)
+  return response?.data; // No "return await" => no lint error
 }
 
 /**

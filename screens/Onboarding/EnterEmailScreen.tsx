@@ -31,10 +31,12 @@ export default function EnterEmailScreen() {
   useEffect(() => {
     const checkIfSignedIn = async () => {
       try {
-        const user = await GoogleSignin.signInSilently();
+        const signinResponse = await GoogleSignin.signInSilently();
+        const user = signinResponse?.data?.user || null;
+        console.log(`signinsilently yielded user ${JSON.stringify(user)}`)
 
         // If user.data is null, that means they really need to sign in again
-        if (user != null && user.data == null) {
+        if (user == null) {
           throw { code: statusCodes.SIGN_IN_REQUIRED, message: 'User needs to sign in.' };
         }
 
@@ -43,7 +45,8 @@ export default function EnterEmailScreen() {
         setIsSignedIn(true);
 
         // Log into api client to store JWT token to device
-        const log_res = login(user.email, user.google_id);
+        console.log(`user email ${user.email}`)
+        const log_res = login(user.email, '12345');
         console.log(JSON.stringify(log_res))
 
         // Since they're already signed in, move on to the next onboarding step

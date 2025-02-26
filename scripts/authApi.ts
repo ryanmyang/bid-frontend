@@ -1,6 +1,6 @@
 // authApi.ts
 import { request } from './apiClient';
-import { saveTokens, removeTokens } from './authStorage';
+import { saveTokens, removeTokens, getTokens } from './authStorage';
 
 interface LoginResponse {
   access_token: string;
@@ -9,15 +9,22 @@ interface LoginResponse {
 }
 
 /** Log in with email/password, store tokens */
+import axios from 'axios';
+
 export async function login(email: string, password: string) {
-  const data: LoginResponse = await request('/user/login', {
-    method: 'POST',
-    body: { email, password },
-  }, true);
-  // On success, store the tokens
-  console.log(`Attempted logging into back end. ${JSON.stringify(data)}`)
-  console.log(`Refresh Token: ${data.refresh_token}`)
+  console.log('Logging in');
+  // Change BASE_URL if needed
+  const BASE_URL = 'http://127.0.0.1:5000/api/v1';
+
+  const response = await axios.post<LoginResponse>(`${BASE_URL}/user/login`, {
+    email,
+    password,
+  });
+
+  const data = response.data;
   await saveTokens(data.access_token, data.refresh_token);
+  const tokens = await getTokens();
+  console.log(`Logged in, received tokens ${JSON.stringify(tokens)}`)
   return data;
 }
 

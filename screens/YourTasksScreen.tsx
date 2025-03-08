@@ -1,49 +1,79 @@
-import React, { useState } from 'react';
+// YourTasksScreen.tsx
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { theme } from '../styles/theme';
 import CreateTaskModal from '../modals/CreateTaskModal';
+import { JobsAPI } from '@/scripts/jobsClient';
 
 interface TaskItem {
   id: string;
-  date: string;
-  title: string;
-  currentBid: string;
+  date: string;       // e.g. '02/07/2025'
+  title: string;      // e.g. 'Take my suit to the dry cleaners'
+  currentBid: string; // e.g. '$15.00'
   numBidders: number;
 }
 
 export default function YourTasksScreen() {
   const [activeTab, setActiveTab] = useState<'Current' | 'Expired'>('Current');
   const [isCreationModalVisible, setIsCreationModalVisible] = useState(false);
-  const [tasksCurrent, setTasksCurrent] = useState<TaskItem[]>([
-    {
-      id: '1',
-      date: '02/07/2025',
-      title: 'Take my suit to the dry cleaners',
-      currentBid: '$15.00',
-      numBidders: 4,
-    },
-    {
-      id: '2',
-      date: '02/06/2024',
-      title: 'Clean my dorm windows',
-      currentBid: '$20.00',
-      numBidders: 3,
-    },
-  ]);
 
-  const tasksExpired: TaskItem[] = [
-    {
-      id: '1',
-      date: '10/01/2024',
-      title: 'Expired Task',
-      currentBid: '$10.00',
-      numBidders: 2,
-    },
-  ];
+  // Replace hard-coded tasks with stateful arrays
+  const [tasksCurrent, setTasksCurrent] = useState<TaskItem[]>([]);
+  const [tasksExpired, setTasksExpired] = useState<TaskItem[]>([]);
 
+  async function refreshTasks() {
+    try {
+      // 1) Grab current (unexpired) jobs
+      const currentResponse = await JobsAPI.getMyJobs(); 
+      // 2) Grab expired jobs
+      const expiredResponse = await JobsAPI.getMyExpiredJobs();
+
+      // Transform the incoming job data into TaskItem shape
+      const transformedCurrent = currentResponse.jobs.map((job) => {
+        return {
+          id: job._id ?? 'N/A',
+          date: job.timestamp
+            ? new Date(job.timestamp).toLocaleDateString()
+            : 'N/A',
+          title: job.description,
+          // We'll just use the job's starting price here or you could
+          // compute the top bid from job.bids if you store them
+          currentBid: `$${(job.starting_price ?? 0).toFixed(2)}`,
+          // If you track bids in your job object, you can get the count:
+          numBidders: job.bids ? job.bids.length : 0,
+        } as TaskItem;
+      });
+
+      const transformedExpired = expiredResponse.jobs.map((job) => {
+        return {
+          id: job._id ?? 'N/A',
+          date: job.timestamp
+            ? new Date(job.timestamp).toLocaleDateString()
+            : 'N/A',
+          title: job.description,
+          currentBid: `$${(job.starting_price ?? 0).toFixed(2)}`,
+          numBidders: job.bids ? job.bids.length : 0,
+        } as TaskItem;
+      });
+
+      // Update state
+      setTasksCurrent(transformedCurrent);
+      setTasksExpired(transformedExpired);
+
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+    }
+  };
+  // Fetch tasks on mount
+  useEffect(() => {
+    refreshTasks();
+  }, []); // Empty dependency array => runs once on component mount
+
+  // Decide which data set to display based on the active tab
   const data = activeTab === 'Current' ? tasksCurrent : tasksExpired;
 
+  // Renders a single row item in the FlatList
   const renderItem = ({ item }: { item: TaskItem }) => (
     <View style={styles.taskCard}>
       <View style={styles.cardRow}>
@@ -73,7 +103,7 @@ export default function YourTasksScreen() {
         Click on the task card for info on bidders and to accept bids!
       </Text>
 
-      {/* Toggle */}
+      {/* Toggle Tabs */}
       <View style={styles.tabRow}>
         <TouchableOpacity
           style={[styles.tabButton, activeTab === 'Current' && styles.tabButtonActive]}
@@ -118,16 +148,30 @@ export default function YourTasksScreen() {
       <CreateTaskModal
         visible={isCreationModalVisible}
         onClose={() => setIsCreationModalVisible(false)}
-        onSubmit={(newTask) => {
-          const newTaskItem = {
-            id: Date.now().toString(),
-            date: new Date().toLocaleDateString(),
-            title: newTask.name,
-            currentBid: '$0.00',
-            numBidders: 0,
-          };
-          setTasksCurrent(prev => [...prev, newTaskItem]);
-          setIsCreationModalVisible(false);
+        onSubmit={async (newTask) => {
+          try {
+            // Build a new "Job" object from modal data
+            await JobsAPI.createJob({
+              job_name: newTask.name,
+              description: newTask.detailedDescription,
+              starting_price: newTask.price,       // e.g. user-chosen
+              expires_in: 86400,                   // e.g. 24 hours in seconds (customize as needed)
+              media: [],                           // or handle user attachments if you have them
+              tags: {
+                category: 'Custom',                // use or parse from newTask.categories if you prefer
+                location: 'N/A',                   // or fetch from user input
+                tags: newTask.categories           // store array of categories in 'tags'
+              },
+            });
+      
+            // Now re-fetch tasks from server so "Current" shows the newly created task
+            await refreshTasks();
+          } catch (err) {
+            console.error('Error creating job:', err);
+          } finally {
+            // Close the modal no matter what
+            setIsCreationModalVisible(false);
+          }
         }}
       />
     </View>

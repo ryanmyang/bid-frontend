@@ -1,5 +1,5 @@
 // authApi.ts
-import { request } from './apiClient';
+import { request, BASE_URL } from './apiClient';
 import { saveTokens, removeTokens, getTokens } from './authStorage';
 
 interface LoginResponse {
@@ -11,10 +11,10 @@ interface LoginResponse {
 /** Log in with email/password, store tokens */
 import axios from 'axios';
 
+
 export async function login(email: string, password: string) {
   console.log('Logging in');
   // Change BASE_URL if needed
-  const BASE_URL = 'http://127.0.0.1:5000/api/v1';
 
   const response = await axios.post<LoginResponse>(`${BASE_URL}/user/login`, {
     email,
@@ -34,8 +34,10 @@ export async function logout() {
   // Optionally call server endpoint to invalidate refresh token
 }
 
-/** Example: get the current user's info (authenticated request) */
-export async function getCurrentUser() {
-  const data = await request('/user/me');
-  return data; // your user object
+
+export async function completeTask(taskId: string): Promise<any> {
+  return await request('/user/completed-task', {
+    method: 'POST',
+    body: { task_id: taskId },
+  });
 }

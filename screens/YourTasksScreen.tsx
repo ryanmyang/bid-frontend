@@ -1,10 +1,12 @@
 // YourTasksScreen.tsx
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
+import { Alert, View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { theme } from '../styles/theme';
 import CreateTaskModal from '../modals/CreateTaskModal';
 import { JobsAPI } from '@/scripts/jobsClient';
+import { Provider as PaperProvider, Menu } from 'react-native-paper';
+
 
 interface TaskItem {
   id: string;
@@ -13,6 +15,58 @@ interface TaskItem {
   currentBid: string; // e.g. '$15.00'
   numBidders: number;
 }
+
+
+const TaskCard = ({
+  item,
+  refreshTasks,
+}: {
+  item: TaskItem;
+  refreshTasks: () => void;
+}) => {
+  const [menuVisible, setMenuVisible] = useState(false);
+
+  const openMenu = () => setMenuVisible(true);
+  const closeMenu = () => setMenuVisible(false);
+
+  const handleDelete = async () => {
+    try {
+      await JobsAPI.deleteJob(item.id);
+      refreshTasks();
+    } catch (error) {
+      console.error('Error deleting job:', error);
+    }
+    closeMenu();
+  };
+
+  return (
+    <View style={styles.taskCard}>
+      <View style={styles.cardRow}>
+        <Text style={styles.date}>{item.date}</Text>
+        <Menu
+          visible={menuVisible}
+          onDismiss={closeMenu}
+          anchor={
+            <TouchableOpacity onPress={openMenu}>
+              <Ionicons name="ellipsis-vertical" size={18} color="#000" />
+            </TouchableOpacity>
+          }
+        >
+          <Menu.Item onPress={handleDelete} title="Delete" />
+        </Menu>
+      </View>
+      <Text style={styles.title}>{item.title}</Text>
+      <View style={styles.bidRow}>
+        <Text style={styles.bidLabel}>TOP BID</Text>
+        <Text style={styles.bid}>{item.currentBid}</Text>
+        <View style={styles.biddersContainer}>
+          <Text style={styles.biddersText}>{item.numBidders} BIDDERS</Text>
+        </View>
+      </View>
+    </View>
+  );
+};
+
 
 export default function YourTasksScreen() {
   const [activeTab, setActiveTab] = useState<'Current' | 'Expired'>('Current');
@@ -73,108 +127,136 @@ export default function YourTasksScreen() {
   // Decide which data set to display based on the active tab
   const data = activeTab === 'Current' ? tasksCurrent : tasksExpired;
 
-  // Renders a single row item in the FlatList
-  const renderItem = ({ item }: { item: TaskItem }) => (
-    <View style={styles.taskCard}>
-      <View style={styles.cardRow}>
-        <Text style={styles.date}>{item.date}</Text>
-        <TouchableOpacity>
-          <Ionicons name="ellipsis-vertical" size={18} color="#000" />
-        </TouchableOpacity>
-      </View>
-      <Text style={styles.title}>{item.title}</Text>
+  // // Renders a single row item in the FlatList
+  // const renderItem = ({ item }: { item: TaskItem }) => (
+  //   <View style={styles.taskCard}>
+  //     <View style={styles.cardRow}>
+  //       <Text style={styles.date}>{item.date}</Text>
+  //       <TouchableOpacity
+  //       onPress={() => {
+  //         Alert.alert(
+  //           'Options',
+  //           'Choose an action',
+  //           [
+  //             {
+  //               text: 'Delete',
+  //               style: 'destructive',
+  //               onPress: async () => {
+  //                 try {
+  //                   await JobsAPI.deleteJob(item.id);
+  //                   refreshTasks(); // re-fetch tasks so the UI updates
+  //                 } catch (error) {
+  //                   console.error('Error deleting job:', error);
+  //                 }
+  //               },
+  //             },
+  //             { text: 'Cancel', style: 'cancel' },
+  //           ],
+  //           { cancelable: true }
+  //         );
+  //       }}
+  //     >
+  //       <Ionicons name="ellipsis-vertical" size={18} color="#000" />
+  //     </TouchableOpacity>
+  //     </View>
+  //     <Text style={styles.title}>{item.title}</Text>
 
-      <View style={styles.bidRow}>
-        <Text style={styles.bidLabel}>TOP BID</Text>
-        <Text style={styles.bid}>{item.currentBid}</Text>
-        <View style={styles.biddersContainer}>
-          <Text style={styles.biddersText}>{item.numBidders} BIDDERS</Text>
-        </View>
-      </View>
-    </View>
-  );
-
+  //     <View style={styles.bidRow}>
+  //       <Text style={styles.bidLabel}>TOP BID</Text>
+  //       <Text style={styles.bid}>{item.currentBid}</Text>
+  //       <View style={styles.biddersContainer}>
+  //         <Text style={styles.biddersText}>{item.numBidders} BIDDERS</Text>
+  //       </View>
+  //     </View>
+  //   </View>
+  // );
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <Text style={styles.heading}>Your Requests</Text>
-      <Text style={styles.subtext}>
-        See all your current outgoing tasks!
-        Click on the task card for info on bidders and to accept bids!
-      </Text>
+    <PaperProvider>
+      <View style={styles.container}>
+        <Text style={styles.heading}>Your Requests</Text>
+        <Text style={styles.subtext}>
+          See all your current outgoing tasks! Click on the task card for info on bidders and to accept bids!
+        </Text>
 
-      {/* Toggle Tabs */}
-      <View style={styles.tabRow}>
-        <TouchableOpacity
-          style={[styles.tabButton, activeTab === 'Current' && styles.tabButtonActive]}
-          onPress={() => setActiveTab('Current')}
-        >
-          <Text
-            style={[styles.tabButtonText, activeTab === 'Current' && styles.tabButtonTextActive]}
+        <View style={styles.tabRow}>
+          <TouchableOpacity
+            style={[
+              styles.tabButton,
+              activeTab === 'Current' && styles.tabButtonActive,
+            ]}
+            onPress={() => setActiveTab('Current')}
           >
-            Current
-          </Text>
+            <Text
+              style={[
+                styles.tabButtonText,
+                activeTab === 'Current' && styles.tabButtonTextActive,
+              ]}
+            >
+              Current
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.tabButton,
+              activeTab === 'Expired' && styles.tabButtonActive,
+            ]}
+            onPress={() => setActiveTab('Expired')}
+          >
+            <Text
+              style={[
+                styles.tabButtonText,
+                activeTab === 'Expired' && styles.tabButtonTextActive,
+              ]}
+            >
+              Expired
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <FlatList
+          data={data}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <TaskCard item={item} refreshTasks={refreshTasks} />
+          )}
+          contentContainerStyle={{ paddingBottom: 80 }}
+        />
+
+        <TouchableOpacity
+          style={styles.fabButton}
+          onPress={() => setIsCreationModalVisible(true)}
+        >
+          <Ionicons name="add" size={24} color="#fff" />
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[styles.tabButton, activeTab === 'Expired' && styles.tabButtonActive]}
-          onPress={() => setActiveTab('Expired')}
-        >
-          <Text
-            style={[styles.tabButtonText, activeTab === 'Expired' && styles.tabButtonTextActive]}
-          >
-            Expired
-          </Text>
-        </TouchableOpacity>
+        <CreateTaskModal
+          visible={isCreationModalVisible}
+          onClose={() => setIsCreationModalVisible(false)}
+          onSubmit={async (newTask) => {
+            try {
+              await JobsAPI.createJob({
+                job_name: newTask.name,
+                description: newTask.detailedDescription,
+                starting_price: newTask.price,
+                expires_in: newTask.expirationHours,
+                media: [],
+                tags: {
+                  category: 'Custom',
+                  location: 'N/A',
+                  tags: newTask.categories,
+                },
+              });
+              await refreshTasks();
+            } catch (err) {
+              console.error('Error creating job:', err);
+            } finally {
+              setIsCreationModalVisible(false);
+            }
+          }}
+        />
       </View>
-
-      {/* Task List */}
-      <FlatList
-        data={data}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        contentContainerStyle={{ paddingBottom: 80 }}
-      />
-
-      {/* Floating Add Button */}
-      <TouchableOpacity 
-        style={styles.fabButton}
-        onPress={() => setIsCreationModalVisible(true)}
-      >
-        <Ionicons name="add" size={24} color="#fff" />
-      </TouchableOpacity>
-
-      {/* Create Task Modal */}
-      <CreateTaskModal
-        visible={isCreationModalVisible}
-        onClose={() => setIsCreationModalVisible(false)}
-        onSubmit={async (newTask) => {
-          try {
-            // Build a new "Job" object from modal data
-            await JobsAPI.createJob({
-              job_name: newTask.name,
-              description: newTask.detailedDescription,
-              starting_price: newTask.price,       // e.g. user-chosen
-              expires_in: 86400,                   // e.g. 24 hours in seconds (customize as needed)
-              media: [],                           // or handle user attachments if you have them
-              tags: {
-                category: 'Custom',                // use or parse from newTask.categories if you prefer
-                location: 'N/A',                   // or fetch from user input
-                tags: newTask.categories           // store array of categories in 'tags'
-              },
-            });
-      
-            // Now re-fetch tasks from server so "Current" shows the newly created task
-            await refreshTasks();
-          } catch (err) {
-            console.error('Error creating job:', err);
-          } finally {
-            // Close the modal no matter what
-            setIsCreationModalVisible(false);
-          }
-        }}
-      />
-    </View>
+    </PaperProvider>
   );
 }
 

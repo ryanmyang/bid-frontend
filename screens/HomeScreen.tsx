@@ -7,7 +7,7 @@ import MessageModal from '../modals/MessageModal';
 import { useNavigation } from '@react-navigation/native';
 import { theme } from '../styles/theme';
 import { JobsAPI, Bid } from '@/scripts/jobsClient'; // <-- Import your Jobs API
-import { login } from '@/scripts/authApi';
+import { login, completeTask } from '@/scripts/authApi';
 import { Float } from 'react-native/Libraries/Types/CodegenTypes';
 
 interface Task {
@@ -66,15 +66,25 @@ export default function HomeScreen() {
   }, []);
 
   // Remove a task from the array after user swipes left (dismiss)
-  const handleDismiss = (taskId: string) => {
+  const handleDismiss = async (taskId: string) => {
+    try {
+      await completeTask(taskId);
+    } catch (error) {
+      console.error("Error marking task as complete", error);
+    }
     setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
   };
 
-  const addBid = (taskId: string, bidAmt:Float) => {
-    const bid: Bid = {amount: bidAmt}
-    JobsAPI.addBid(taskId, bid);
-    console.log('Bid submitted:', taskId, bidAmt);
-
+  const addBid = async (taskId: string, bidAmt: Float) => {
+    const bid: Bid = { amount: bidAmt };
+    try {
+      await JobsAPI.addBid(taskId, bid);
+      console.log('Bid submitted:', taskId, bidAmt);
+      await completeTask(taskId);
+      setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
+    } catch (error) {
+      console.error("Error submitting bid", error);
+    }
   };
 
   return (

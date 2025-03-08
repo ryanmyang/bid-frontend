@@ -3,10 +3,10 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { getTokens, saveTokens, removeTokens } from './authStorage';
 
-const LOCAL_DEV_URL = 'http://127.0.0.1:5000/api/v1';
+export const BASE_URL = 'http://127.0.0.1:5000/api/v1';
 let isAlreadyRefreshing = false;
 
-const BASE_URL = LOCAL_DEV_URL;
+
 
 /**
  * Main request wrapper with automatic token refresh.
@@ -83,7 +83,7 @@ async function attemptTokenRefresh(): Promise<boolean> {
     const { refreshToken } = await getTokens();
     if (!refreshToken) throw new Error('No refresh token available');
 
-    const response = await axios.post(`${LOCAL_DEV_URL}/user/token/refresh`, null, {
+    const response = await axios.post(`${BASE_URL}/user/token/refresh`, null, {
       headers: { 'X-Authorization': `Bearer ${refreshToken}` },
     });
 

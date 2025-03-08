@@ -12,10 +12,11 @@ interface CreateTaskModalProps {
 
 export default function CreateTaskModal({ visible, onClose, onSubmit }: CreateTaskModalProps) {
   const [taskData, setTaskData] = useState({
-    name: '',
+    // name: '',
     detailedDescription: '',
     categories: [] as string[],
     price: 10,
+    expirationHours: 24, // added expiration in hours (default value: 24)
     media: null as any,
   });
 
@@ -29,7 +30,11 @@ export default function CreateTaskModal({ visible, onClose, onSubmit }: CreateTa
   };
 
   const handleSubmit = () => {
-    onSubmit(taskData);
+    const payload = {
+      ...taskData,
+      expires_in: taskData.expirationHours * 3600, // convert hours to seconds
+    };
+    onSubmit(payload);
     onClose();
   };
 
@@ -45,13 +50,13 @@ export default function CreateTaskModal({ visible, onClose, onSubmit }: CreateTa
           </View>
 
           <View style={styles.content}>
-            <Text style={styles.label}>Task name*</Text>
+            {/* <Text style={styles.label}>Task name*</Text>
             <TextInput
               style={styles.input}
               placeholder="Request anything!"
               value={taskData.name}
               onChangeText={text => setTaskData({ ...taskData, name: text })}
-            />
+            /> */}
 
 
             <Text style={styles.label}>Description*</Text>
@@ -94,6 +99,18 @@ export default function CreateTaskModal({ visible, onClose, onSubmit }: CreateTa
                 maximumTrackTintColor={theme.colors.grayLight}
               />
             </View>
+
+            <Text style={styles.label}>Expiration (hours)*</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter expiration in hours"
+              value={taskData.expirationHours.toString()}
+              keyboardType="numeric"
+              onChangeText={(text) => {
+                const hours = parseInt(text, 10);
+                setTaskData({ ...taskData, expirationHours: isNaN(hours) ? 24 : hours });
+              }}
+            />
 
             <Text style={styles.label}>Add media (optional)</Text>
             <TouchableOpacity style={styles.mediaButton}>
